@@ -1,0 +1,57 @@
+
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bonnetjes V2</title>
+</head>
+<body>
+  <h1>Bonnetjes App V2</h1>
+  <button onclick="start()">Maak foto</button>
+  <script>
+    async function start() {
+      const clientId = "186de5a3-0b02-4e6b-846d-5d178b2e4578";
+      const tenantId = "3521f9ea-24c4-4d13-9324-9a00f276b5ac";
+      const redirectUri = window.location.origin;
+      const authUrl = `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/authorize?client_id=${clientId}&response_type=token&redirect_uri=${redirectUri}&scope=Files.ReadWrite.All`;
+
+      if (!location.hash.includes("access_token")) {
+        location.href = authUrl;
+        return;
+      }
+
+      const token = new URLSearchParams(location.hash.substring(1)).get('access_token');
+
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.capture = 'environment';
+      input.onchange = async () => {
+        const file = input.files[0];
+        const now = new Date();
+        const timestamp = now.toISOString().slice(0, 19).replace(/[:T]/g, "-");
+        const filename = `Bonnetje_${timestamp}.jpg`;
+
+        const uploadUrl = "https://graph.microsoft.com/v1.0/me/drive/root:/Bonnetjes/" + filename + ":/content";
+
+        const response = await fetch(uploadUrl, {
+          method: "PUT",
+          headers: {
+            "Authorization": "Bearer " + token,
+            "Content-Type": file.type
+          },
+          body: file
+        });
+
+        if (response.ok) {
+          alert("Bonnetje succesvol geüpload!");
+        } else {
+          alert("Upload mislukt. Probeer opnieuw.");
+        }
+      };
+      input.click();
+    }
+  </script>
+</body>
+</html>
