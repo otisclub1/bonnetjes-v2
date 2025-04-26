@@ -4,27 +4,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bonnetjes V2</title>
+  <title>Bonnetjes V2 - Persoonlijk</title>
 </head>
 <body>
-  <h1>Bonnetjes App V2 (verbeterd)</h1>
+  <h1>Bonnetjes App V2 (Persoonlijke OneDrive)</h1>
   <button onclick="start()">Maak foto</button>
   <script>
     async function start() {
       const clientId = "186de5a3-0b02-4e6b-846d-5d178b2e4578";
-      const tenantId = "3521f9ea-24c4-4d13-9324-9a00f276b5ac";
+      const tenant = "consumers"; // Specifiek voor persoonlijk account
       const redirectUri = "https://otisclub1.github.io/bonnetjes-v2/";
-      const scope = "Files.ReadWrite.All";
-      
+      const scope = "Files.ReadWrite";
+
       if (!location.hash.includes("access_token")) {
-        const authUrl = `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/authorize?client_id=${clientId}&response_type=token&redirect_uri=${redirectUri}&scope=${scope}`;
+        const authUrl = `https://login.microsoftonline.com/${tenant}/oauth2/v2.0/authorize?client_id=${clientId}&response_type=token&redirect_uri=${redirectUri}&scope=${scope}`;
         location.href = authUrl;
         return;
       }
 
       const params = new URLSearchParams(location.hash.substring(1));
       const accessToken = params.get('access_token');
-      
+
       if (!accessToken) {
         alert("Geen toegangstoken gevonden. Probeer opnieuw in te loggen.");
         return;
@@ -39,6 +39,7 @@
         const now = new Date();
         const timestamp = now.toISOString().slice(0, 19).replace(/[:T]/g, "-");
         const filename = `Bonnetje_${timestamp}.jpg`;
+
         const uploadUrl = `https://graph.microsoft.com/v1.0/me/drive/root:/Bonnetjes/${filename}:/content`;
 
         try {
@@ -52,7 +53,7 @@
           });
 
           if (response.ok) {
-            alert("Bonnetje succesvol geüpload!");
+            alert("Bonnetje succesvol geüpload naar jouw OneDrive!");
           } else {
             const errorData = await response.json();
             console.error(errorData);
