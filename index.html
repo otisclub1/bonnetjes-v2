@@ -8,7 +8,7 @@
   <link rel="icon" href="icon.png">
 </head>
 <body>
-  <h1>Bonnetjes App V3 (Lite versie)</h1>
+  <h1>Bonnetjes App V3 Lite</h1>
   <button onclick="start()">Maak foto</button>
   <div id="status"></div>
 
@@ -54,6 +54,8 @@
       input.type = 'file';
       input.accept = 'image/*';
       input.capture = 'environment';
+      input.click();
+
       input.onchange = async () => {
         const originalFile = input.files[0];
         const now = new Date();
@@ -76,4 +78,35 @@
         let winkel = "Bonnetje";
         if (text.includes("Home Depot")) winkel = "HomeDepot";
         else if (text.includes("Kooyman")) winkel = "Kooyman";
-        else if (text.includes("Van der Tweel")) winkel = "VanDer
+        else if (text.includes("Van der Tweel")) winkel = "VanDerTweel";
+
+        const filename = `${winkel}_${timestamp}.jpg`;
+
+        const uploadUrl = `https://graph.microsoft.com/v1.0/me/drive/root:/Bonnetjes/${filename}:/content`;
+
+        try {
+          const response = await fetch(uploadUrl, {
+            method: "PUT",
+            headers: {
+              "Authorization": "Bearer " + accessToken,
+              "Content-Type": originalFile.type
+            },
+            body: originalFile
+          });
+
+          if (response.ok) {
+            alert("Bonnetje succesvol geüpload naar jouw OneDrive!");
+          } else {
+            const errorData = await response.json();
+            console.error(errorData);
+            alert("Upload mislukt: " + (errorData.error.message || "Onbekende fout."));
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Er trad een netwerkfout op. Probeer opnieuw.");
+        }
+      };
+    }
+  </script>
+</body>
+</html>
