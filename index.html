@@ -3,17 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bonnetjes App V3</title>
+  <title>Bonnetjes App V3 Lite</title>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.png">
 </head>
 <body>
-  <h1>Bonnetjes App V3 (Persoonlijke OneDrive + OCR)</h1>
+  <h1>Bonnetjes App V3 (Lite versie)</h1>
   <button onclick="start()">Maak foto</button>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.5/dist/tesseract.min.js"></script>
   <script>
+    async function resizeImage(file, maxWidth = 1024) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const scaleSize = maxWidth / img.width;
+          canvas.width = maxWidth;
+          canvas.height = img.height * scaleSize;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          canvas.toBlob(resolve, file.type, 0.7);
+        };
+        img.src = URL.createObjectURL(file);
+      });
+    }
+
     async function start() {
       const clientId = "186de5a3-0b02-4e6b-846d-5d178b2e4578";
       const tenant = "consumers";
@@ -39,18 +55,19 @@
       input.accept = 'image/*';
       input.capture = 'environment';
       input.onchange = async () => {
-        const file = input.files[0];
+        const originalFile = input.files[0];
         const now = new Date();
         const timestamp = now.toISOString().slice(0, 19).replace(/[:T]/g, "-");
 
         document.getElementById('status').innerText = "Bezig met tekst lezen...";
 
-        // OCR uitvoeren
+        const resizedBlob = await resizeImage(originalFile);
+
         const worker = Tesseract.createWorker();
         await worker.load();
         await worker.loadLanguage('eng');
         await worker.initialize('eng');
-        const { data: { text } } = await worker.recognize(file);
+        const { data: { text } } = await worker.recognize(resizedBlob);
         await worker.terminate();
 
         document.getElementById('status').innerText = "";
@@ -59,36 +76,4 @@
         let winkel = "Bonnetje";
         if (text.includes("Home Depot")) winkel = "HomeDepot";
         else if (text.includes("Kooyman")) winkel = "Kooyman";
-        else if (text.includes("Van der Tweel")) winkel = "VanDerTweel";
-
-        const filename = `${winkel}_${timestamp}.jpg`;
-
-        const uploadUrl = `https://graph.microsoft.com/v1.0/me/drive/root:/Bonnetjes/${filename}:/content`;
-
-        try {
-          const response = await fetch(uploadUrl, {
-            method: "PUT",
-            headers: {
-              "Authorization": "Bearer " + accessToken,
-              "Content-Type": file.type
-            },
-            body: file
-          });
-
-          if (response.ok) {
-            alert("Bonnetje succesvol geüpload naar jouw OneDrive!");
-          } else {
-            const errorData = await response.json();
-            console.error(errorData);
-            alert("Upload mislukt: " + (errorData.error.message || "Onbekende fout."));
-          }
-        } catch (err) {
-          console.error(err);
-          alert("Er trad een netwerkfout op. Probeer opnieuw.");
-        }
-      };
-      input.click();
-    }
-  </script>
-</body>
-</html>
+        else if (text.includes("Van der Tweel")) winkel = "VanDer
