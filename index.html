@@ -157,8 +157,11 @@
 
           if (response.ok) {
             document.getElementById('status').innerText = "Upload geslaagd!";
-            document.getElementById('pling').play(); // Geluidje spelen 🎶
+            document.getElementById('pling').play(); // geluidje spelen
+            document.getElementById('fotoBtn').innerText = "Scan nog een bon"; // knoptekst aanpassen
             alert("Bonnetje succesvol geüpload naar jouw OneDrive!");
+          }
+
           } else {
             const errorData = await response.json();
             console.error(errorData);
