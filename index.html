@@ -1,18 +1,22 @@
-
 <!DOCTYPE html>
 <html lang="nl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bonnetjes V2 - Persoonlijk</title>
+  <title>Bonnetjes App V3</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.png">
 </head>
 <body>
-  <h1>Bonnetjes App V2 (Persoonlijke OneDrive)</h1>
+  <h1>Bonnetjes App V3 (Persoonlijke OneDrive + OCR)</h1>
   <button onclick="start()">Maak foto</button>
+  <div id="status"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.5/dist/tesseract.min.js"></script>
   <script>
     async function start() {
       const clientId = "186de5a3-0b02-4e6b-846d-5d178b2e4578";
-      const tenant = "consumers"; // Specifiek voor persoonlijk account
+      const tenant = "consumers";
       const redirectUri = "https://otisclub1.github.io/bonnetjes-v2/";
       const scope = "Files.ReadWrite";
 
@@ -38,7 +42,26 @@
         const file = input.files[0];
         const now = new Date();
         const timestamp = now.toISOString().slice(0, 19).replace(/[:T]/g, "-");
-        const filename = `Bonnetje_${timestamp}.jpg`;
+
+        document.getElementById('status').innerText = "Bezig met tekst lezen...";
+
+        // OCR uitvoeren
+        const worker = Tesseract.createWorker();
+        await worker.load();
+        await worker.loadLanguage('eng');
+        await worker.initialize('eng');
+        const { data: { text } } = await worker.recognize(file);
+        await worker.terminate();
+
+        document.getElementById('status').innerText = "";
+
+        // Slimme bestandsnaam bepalen
+        let winkel = "Bonnetje";
+        if (text.includes("Home Depot")) winkel = "HomeDepot";
+        else if (text.includes("Kooyman")) winkel = "Kooyman";
+        else if (text.includes("Van der Tweel")) winkel = "VanDerTweel";
+
+        const filename = `${winkel}_${timestamp}.jpg`;
 
         const uploadUrl = `https://graph.microsoft.com/v1.0/me/drive/root:/Bonnetjes/${filename}:/content`;
 
