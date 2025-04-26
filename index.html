@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Curacao bonnetjes App</title>
+  <title>Bonnetjes App V4 - Schone versie</title>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.png">
   <style>
@@ -47,7 +47,7 @@
   </style>
 </head>
 <body>
-  <h1>Bonnetjes🌴</h1>
+  <h1>Bonnetjes App V4 🌴</h1>
   <button id="locatieBtn" onclick="bepaalLocatie()">Bepaal locatie</button>
   <div id="status"></div>
   <button id="fotoBtn" style="display:none;" onclick="maakFoto()">Maak foto</button>
@@ -58,7 +58,7 @@
   <script>
     let gekozenWinkel = "Bonnetje";
     const winkels = [
-     { naam: "Thuis", lat: 12.11333, lon: -68.87839 },
+      { naam: "Thuis", lat: 12.11333, lon: -68.87839 },
 { naam: "Building Depot", lat: 12.11642, lon: -68.90886},
 { naam: "van der Tweel Zeelandia", lat: 12.11566, lon: -68.90706},
 { naam: "van der Tweel Jan Thiel", lat: 12.07806, lon: -68.87702},
@@ -67,7 +67,7 @@
     ];
 
     function afstand(lat1, lon1, lat2, lon2) {
-      const R = 6371e3; 
+      const R = 6371e3;
       const φ1 = lat1 * Math.PI/180;
       const φ2 = lat2 * Math.PI/180;
       const Δφ = (lat2-lat1) * Math.PI/180;
@@ -157,11 +157,9 @@
 
           if (response.ok) {
             document.getElementById('status').innerText = "Upload geslaagd!";
-            document.getElementById('pling').play(); // geluidje spelen
-            document.getElementById('fotoBtn').innerText = "Scan nog een bon"; // knoptekst aanpassen
+            document.getElementById('fotoBtn').innerText = "Scan nog een bon"; // Hier knoptekst veranderen
+            document.getElementById('pling').play(); // Succesgeluid
             alert("Bonnetje succesvol geüpload naar jouw OneDrive!");
-          }
-
           } else {
             const errorData = await response.json();
             console.error(errorData);
